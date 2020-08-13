@@ -1,12 +1,15 @@
-// $('#hour9').val(localStorage.getItem('hour9'));
-// $('#hour10').val(localStorage.getItem('hour10'));
-// $('#hour11').val(localStorage.getItem('hour11'));
-// $('#hour12').val(localStorage.getItem('hour12'));
-// $('#hour13').val(localStorage.getItem('hour13'));
-// $('#hour14').val(localStorage.getItem('hour14'));
-// $('#hour15').val(localStorage.getItem('hour15'));
-// $('#hour16').val(localStorage.getItem('hour16'));
-// $('#hour17').val(localStorage.getItem('hour17'));
+const $currentDay = $('#currentDay');
+const $currentTime = $('#currentTime');
+
+setInterval(function () {
+    Time = moment();
+    currentTime = moment().format("h:mm:ss a");
+
+    currentDay = moment().format("dddd, MMMM Do");
+    $currentDay.text(currentDay);
+    $currentTime.text(currentTime);
+
+}, 1000);
 
 for (let index = 9; index < 18; index++) {
 
