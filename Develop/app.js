@@ -2,7 +2,15 @@ const $currentDay = $('#currentDay');
 const $currentTime = $('#currentTime');
 const $schedule = $('#schedule');
 
-const workday = ['9AM', '10AM', '11AM', '12PM', '1PM', '2PM', '3PM', '4PM', '5PM'];
+const workday = [moment().hours(9).minutes(0).seconds(0), 
+    moment().hours(10).minutes(0).seconds(0), 
+    moment().hours(11).minutes(0).seconds(0), 
+    moment().hours(12).minutes(0).seconds(0), 
+    moment().hours(13).minutes(0).seconds(0), 
+    moment().hours(14).minutes(0).seconds(0), 
+    moment().hours(15).minutes(0).seconds(0), 
+    moment().hours(16).minutes(0).seconds(0), 
+    moment().hours(17).minutes(0).seconds(0)];
 
 let persist = [];
 // saved timeSlots
@@ -26,17 +34,15 @@ class timeSlot {
 
 
 // Timer for the top
+var Time = moment().format("dddd, MMMM Do");
 
-$currentDay.text(moment().format("dddd, MMMM Do"));
 setInterval(function () {
+    Time = moment();
+    currentTime = moment().format("h:mm:ss a");
 
-    $currentTime.text(moment().format("h:mm:ss a"));
-
-}, parseInt(parseFloat(3.6e+6).toFixed(0)));
-$currentTime.text(moment().format("h:mm:ss a"));
-setInterval(function () {
-
-    $currentTime.text(moment().format("h:mm:ss a"));
+    currentDay = moment().format("dddd, MMMM Do");
+    $currentDay.text(currentDay);
+    $currentTime.text(currentTime);
 
 }, 1000);
 
@@ -50,10 +56,10 @@ function genTable(persist) {
         var $input = $('<input>');
         if (persist.length === 0) {
 
-            console.log(workday[index])
-            $timeTD.text(workday[index]);
+            console.log(workday[index].format('hA'));
+            $timeTD.text(workday[index].format('hA'));
 
-            $eventForm.attr('class', 'event-form').attr("id", workday[index]);
+            $eventForm.attr('class', 'event-form').attr("id", workday[index].format('hA'));
 
             $input.attr('type', 'text');
 
@@ -61,34 +67,41 @@ function genTable(persist) {
         } else {
             for (let order = 0; order < persist.length; order++) {
                 // if: found a timeSlot object in local storage, then change the placeholder text
-                if (persist[order].time === workday[index]) {
-                    hrly = new timeSlot(workday[index], persist[order].event);
-                    $timeTD.text(hrly.time);
+                if (persist[order].time === workday[index].format('hA')) {
+                    hrly = new timeSlot(workday[index].format('hA'), persist[order].event);
+                    $timeTD.text(hrly.time).attr('class', 'hour');
 
                     $eventForm.attr('class', 'event-form').attr("id", hrly.time);
 
                     $input.attr('type', 'text').attr('placeholder', hrly.event);
 
                 } else {
-                    
-                    $timeTD.text(workday[index]);
 
-                    $eventForm.attr('class', 'event-form').attr("id", workday[index]);
+                    $timeTD.text(workday[index].format('hA')).attr('class', 'hour');
+
+                    $eventForm.attr('class', 'event-form').attr("id", workday[index].format('hA'));
 
                     $input.attr('type', 'text');
                 }
 
             }
         }
-        var $button = $('<button>').attr('type', 'submit').text('save');
+        var $button = $('<button>').attr('type', 'submit').text('save').attr('class', 'saveBtn');
 
         $eventForm.append($input).append($button);
 
         var $eventTD = $('<td>');
-
         $eventTD.append($eventForm);
-
         var $newRow = $('<tr>');
+        console.log(workday[index].isAfter(moment()));
+        //  past present future
+        if (workday[index] === moment().minutes(0).seconds(0)) {
+            $newRow.attr('class', 'row present');
+        } else if (workday[index].isAfter(moment())) {
+            $newRow.attr('class', 'row future');
+        } else {
+            $newRow.attr('class', 'row past');
+        } 
 
         $newRow.append($timeTD, $eventTD);
 
@@ -98,13 +111,11 @@ function genTable(persist) {
 
 genTable(persist);
 
-$('.event-form').submit(function (e) {
+$('.event-form').on('submit', function (e) {
 
-    // prevent default
-    e.preventDefault();
 
     var newTS = new timeSlot(e.currentTarget.id, e.currentTarget.childNodes[0].value);
-
+    console.log(newTS);
     persist.push(newTS);
 
     console.log(persist);
@@ -112,6 +123,8 @@ $('.event-form').submit(function (e) {
     localStorage.setItem('savedTimeSlots', JSON.stringify(persist));
 
     genTable(persist);
+    // prevent default
+    e.preventDefault();
 
 
 });
